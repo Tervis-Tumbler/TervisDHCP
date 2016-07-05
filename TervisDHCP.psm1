@@ -1,3 +1,6 @@
+#Requires -Modules WriteVerboseAdvanced
+#Requires -Version 5
+
 function Get-TervisDhcpServerv4Scope {
     param(
         [Parameter(Mandatory)]$ScopeID
@@ -28,6 +31,7 @@ function Set-TervisDHCPForVM {
 }
 
 function Remove-TervisDHCPForVM {
+    [CmdletBinding()]
     param(
         [parameter(Mandatory, ValueFromPipeline)]$VM,
         [switch]$PassThru
@@ -38,6 +42,7 @@ function Remove-TervisDHCPForVM {
     Get-DhcpServerv4Scope -ComputerName $DHCPServerName | 
     Get-DhcpServerv4Lease -ComputerName $DHCPServerName | 
     where ClientID -EQ $VMNetworkAdapter.MacAddressWithDashes |
+    Write-VerboseAdvanced -PassThrough -Verbose:($VerbosePreference -ne "SilentlyContinue") |
     Remove-DhcpServerv4Reservation -ComputerName $DHCPServerName -Confirm
 
     if($PassThru) {$VM}

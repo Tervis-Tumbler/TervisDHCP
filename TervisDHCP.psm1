@@ -47,3 +47,15 @@ function Remove-TervisDHCPForVM {
 
     if($PassThru) {$VM}
 }
+
+function Find-DHCPServerv4Lease {
+    [CmdletBinding()]
+    param(
+        [parameter(Mandatory, ValueFromPipelineByPropertyName)]$MACAddressWithDashes
+    )
+    $DHCPServerName = Get-DhcpServerInDC | select -First 1 -ExpandProperty DNSName
+
+    Get-DhcpServerv4Scope -ComputerName $DHCPServerName | 
+    Get-DhcpServerv4Lease -ComputerName $DHCPServerName | 
+    where ClientID -EQ $MACAddressWithDashes
+}

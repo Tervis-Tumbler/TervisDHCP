@@ -59,3 +59,23 @@ function Find-DHCPServerv4Lease {
     Get-DhcpServerv4Lease -ComputerName $DHCPServerName | 
     where ClientID -EQ $MACAddressWithDashes
 }
+
+function Find-DHCPServerv4LeaseIPAddress {
+    [CmdletBinding()]
+    param(
+        [parameter(Mandatory, ValueFromPipelineByPropertyName)]$MACAddressWithDashes,
+        [Switch]$AsString
+    )
+    $DHCPServerName = Get-DhcpServerInDC | select -First 1 -ExpandProperty DNSName
+
+    $IPAddress = Get-DhcpServerv4Scope -ComputerName $DHCPServerName | 
+    Get-DhcpServerv4Lease -ComputerName $DHCPServerName | 
+    where ClientID -EQ $MACAddressWithDashes |
+    Select -ExpandProperty IPAddress
+
+    if ($AsString) {
+        $IPAddress.IPAddressToString
+    } else {
+        $IPAddress
+    }
+}

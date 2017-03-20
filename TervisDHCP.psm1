@@ -1,19 +1,42 @@
-#Requires -Modules WriteVerboseAdvanced
+#Requires -Modules WriteVerboseAdvanced, TervisEnvironment
 #Requires -Version 5
 
 function Get-TervisDhcpServerv4Scope {
     param(
-        [Parameter(Mandatory)]$ScopeID
+        [Parameter(Mandatory, ParameterSetName="ScopeID")]$ScopeID,
+
+        [Parameter(Mandatory, ParameterSetName="Environment")]
+        [ValidateScript({$_ -in $(Get-TervisEnvironmentName) })]
+        $Environment
     )
     process {
-        $DhcpServerv4Scope = Get-DhcpServerv4Scope -ScopeId $ScopeID -ComputerName $(Get-DhcpServerInDC | select -First 1 -ExpandProperty DNSName)
-        $DhcpServerv4Scope | Mixin-DhcpServerv4Scope
-        $DhcpServerv4Scope
+        Get-DhcpServerv4Scope -ComputerName $(
+            Get-DhcpServerInDC | 
+            select -First 1 -ExpandProperty DNSName
+        ) |
+        where {-not $ScopeID -or $_.ScopeID -EQ $ScopeID} |
+        Add-DhcpServerv4ScopeProperties -PassThru |
+        where {-not $Environment -or $_.Environment -eq $Environment}
     }   
 }
 
-filter Mixin-DhcpServerv4Scope {
-    $_ | Add-Member -MemberType ScriptProperty -Name VLan -Value { $This.Name -match 'VLAN (?<VLANId>..)' | Out-Null; $Local:Matches.VLANId -as [int] }
+function Add-DhcpServerv4ScopeProperties {
+    param (
+        [Parameter(ValueFromPipeline)]$DhcpServerv4Scope,
+        [Switch]$PassThru
+    )
+    process {
+        $DhcpServerv4Scope | 
+        Add-Member -MemberType ScriptProperty -Name VLan -Value { 
+            $This.Name -match 'VLAN (?<VLANId>..)' | Out-Null
+            $Local:Matches.VLANId -as [int] 
+        } -PassThru:$PassThru | 
+        Add-Member -MemberType ScriptProperty -Name Environment -Value { 
+            $This.Name -split " " | 
+            select -First 1 |
+            Where {$_ -in $(Get-TervisEnvironmentName)}
+        } -PassThru:$PassThru
+    }
 }
 
 function Set-TervisDHCPForVM {

@@ -86,14 +86,18 @@ function Find-DHCPServerv4Lease {
 function Find-DHCPServerv4LeaseIPAddress {
     [CmdletBinding()]
     param(
-        [parameter(Mandatory, ValueFromPipelineByPropertyName)]$MACAddressWithDashes,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName="MACAddressWithDashes")]
+        $MACAddressWithDashes,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName="HostName")]
+        $HostName,
         [Switch]$AsString
     )
     $DHCPServerName = Get-DhcpServerInDC | select -First 1 -ExpandProperty DNSName
 
     $IPAddress = Get-DhcpServerv4Scope -ComputerName $DHCPServerName | 
     Get-DhcpServerv4Lease -ComputerName $DHCPServerName | 
-    where ClientID -EQ $MACAddressWithDashes |
+    where {-not $MACAddressWithDashes -or  $_.ClientID -EQ $MACAddressWithDashes} |
+    where {-not $HostName -or  $_.HostName -match $HostName} |
     Select -ExpandProperty IPAddress
 
     if ($AsString) {

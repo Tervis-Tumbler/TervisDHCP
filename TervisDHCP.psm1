@@ -66,7 +66,8 @@ function Remove-TervisDHCPForVM {
     Get-DhcpServerv4Lease -ComputerName $DHCPServerName | 
     where ClientID -EQ $VMNetworkAdapter.MacAddressWithDashes |
     Write-VerboseAdvanced -PassThrough -Verbose:($VerbosePreference -ne "SilentlyContinue") |
-    Remove-DhcpServerv4Reservation -ComputerName $DHCPServerName -Confirm
+    Remove-DhcpServerv4Reservation -ComputerName $DHCPServerName -PassThru -Confirm |
+    Remove-DhcpServerv4Lease -ComputerName $DHCPServerName  -Confirm
 
     if($PassThru) {$VM}
 }

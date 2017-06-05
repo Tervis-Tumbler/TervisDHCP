@@ -27,7 +27,7 @@ function Add-DhcpServerv4ScopeProperties {
     )
     process {
         $DhcpServerv4Scope | 
-        Add-Member -MemberType ScriptProperty -Name VLan -Value { 
+        Add-Member -MemberType ScriptProperty -Name VLan -Value {
             $This.Name -match 'VLAN (?<VLANId>..)' | Out-Null
             $Local:Matches.VLANId -as [int] 
         } -PassThru:$PassThru | 
@@ -72,7 +72,7 @@ function Remove-TervisDHCPForVM {
     if($PassThru) {$VM}
 }
 
-function Remove-TervisDHCPLease {
+function Remove-TervisDHCPReservationAndLease {
     [CmdletBinding()]
     param(
         [parameter(Mandatory, ValueFromPipeline)]$MacAddressWithDashes

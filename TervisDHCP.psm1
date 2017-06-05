@@ -77,14 +77,16 @@ function Remove-TervisDHCPLease {
     param(
         [parameter(Mandatory, ValueFromPipeline)]$MacAddressWithDashes
     )
-    $DHCPServerName = Get-DhcpServerInDC | select -First 1 -ExpandProperty DNSName
+    process {
+        $DHCPServerName = Get-DhcpServerInDC | select -First 1 -ExpandProperty DNSName
 
-    Get-DhcpServerv4Scope -ComputerName $DHCPServerName | 
-    Get-DhcpServerv4Lease -ComputerName $DHCPServerName | 
-    where ClientID -EQ $MacAddressWithDashes |
-    Write-VerboseAdvanced -PassThrough -Verbose:($VerbosePreference -ne "SilentlyContinue") |
-    Remove-DhcpServerv4Reservation -ComputerName $DHCPServerName -PassThru -Confirm |
-    Remove-DhcpServerv4Lease -ComputerName $DHCPServerName  -Confirm
+        Get-DhcpServerv4Scope -ComputerName $DHCPServerName | 
+        Get-DhcpServerv4Lease -ComputerName $DHCPServerName | 
+        where ClientID -EQ $MacAddressWithDashes |
+        Write-VerboseAdvanced -PassThrough -Verbose:($VerbosePreference -ne "SilentlyContinue") |
+        Remove-DhcpServerv4Reservation -ComputerName $DHCPServerName -PassThru -Confirm |
+        Remove-DhcpServerv4Lease -ComputerName $DHCPServerName  -Confirm
+    }
 }
 
 function Find-DHCPServerv4Lease {

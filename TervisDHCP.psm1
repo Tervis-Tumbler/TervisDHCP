@@ -59,7 +59,7 @@ function Remove-TervisDHCPForVM {
         [parameter(Mandatory, ValueFromPipeline)]$VM,
         [switch]$PassThru
     )
-    $VMNetworkAdapter = $VM | Get-TervisVMNetworkAdapter 
+    $VMNetworkAdapter = $VM | Get-TervisVMNetworkAdapter
     $DHCPServerName = Get-DhcpServerInDC | select -First 1 -ExpandProperty DNSName
 
     Get-DhcpServerv4Scope -ComputerName $DHCPServerName | 
@@ -70,6 +70,21 @@ function Remove-TervisDHCPForVM {
     Remove-DhcpServerv4Lease -ComputerName $DHCPServerName  -Confirm
 
     if($PassThru) {$VM}
+}
+
+function Remove-TervisDHCPLease {
+    [CmdletBinding()]
+    param(
+        [parameter(Mandatory, ValueFromPipeline)]$MacAddressWithDashes
+    )
+    $DHCPServerName = Get-DhcpServerInDC | select -First 1 -ExpandProperty DNSName
+
+    Get-DhcpServerv4Scope -ComputerName $DHCPServerName | 
+    Get-DhcpServerv4Lease -ComputerName $DHCPServerName | 
+    where ClientID -EQ $MacAddressWithDashes |
+    Write-VerboseAdvanced -PassThrough -Verbose:($VerbosePreference -ne "SilentlyContinue") |
+    Remove-DhcpServerv4Reservation -ComputerName $DHCPServerName -PassThru -Confirm |
+    Remove-DhcpServerv4Lease -ComputerName $DHCPServerName  -Confirm
 }
 
 function Find-DHCPServerv4Lease {

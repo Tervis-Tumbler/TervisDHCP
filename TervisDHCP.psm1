@@ -119,7 +119,11 @@ function Find-DHCPServerv4LeaseIPAddress {
     Select -ExpandProperty IPAddress
 
     if ($AsString) {
-        $IPAddress.IPAddressToString
+        if ($IPAddress -is [String]) {
+            $IPAddress
+        } else {
+            $IPAddress.IPAddressToString
+        }
     } else {
         $IPAddress
     }

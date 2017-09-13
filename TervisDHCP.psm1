@@ -47,7 +47,7 @@ function Set-TervisDHCPForVM {
     )
     $VMNetworkAdapter = $VM | Get-TervisVMNetworkAdapter 
     $DHCPServerName = Get-DhcpServerInDC | select -First 1 -ExpandProperty DNSName
-    $FreeIPAddress = Get-DhcpServerv4FreeIPAddress -ComputerName $DHCPServerName -ScopeId $DHCPScope
+    $FreeIPAddress = $DHCPScope | Get-DhcpServerv4FreeIPAddress -ComputerName $DHCPServerName
     $DHCPScope | Add-DhcpServerv4Reservation -ClientId $VMNetworkAdapter.MacAddressWithDashes -ComputerName $DHCPServerName -IPAddress $FreeIPAddress -Name $VM.Name -Description $VM.Name
 
     if($PassThru) {$VM}

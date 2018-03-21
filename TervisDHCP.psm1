@@ -157,11 +157,12 @@ function Invoke-TervisDHCPv4EdgeRouterChanges {
     }
 }
 
-function Set-TervisDHCPv4ReservationRouterToEdgeRouter {
+function Set-TervisDHCPv4ReservationRouter {
     param (
         [Parameter(Mandatory)]$Hostname,
         [Parameter(Mandatory,ParameterSetName="ScopeID")]$ScopeID,
-        [Parameter(Mandatory,ParameterSetName="Environment")]$Environment
+        [Parameter(Mandatory,ParameterSetName="Environment")]$Environment,
+        [Parameter(Mandatory)]$Router
     )
     if (-Not $ScopeID) {
         $ScopeID = Get-TervisDhcpServerv4Scope -Environment $Environment | 
@@ -172,6 +173,18 @@ function Set-TervisDHCPv4ReservationRouterToEdgeRouter {
     Get-DhcpServerv4Reservation -ComputerName $DHCPServerName -ScopeId $ScopeID |
     Where-Object Name -Match $Hostname |
     ForEach-Object {
-        Set-DhcpServerv4OptionValue -ComputerName $DHCPServerName -Router 10.172.48.150 -ReservedIP $_.IPAddress
+        Set-DhcpServerv4OptionValue -ComputerName $DHCPServerName -Router $Router -ReservedIP $_.IPAddress
     }
+}
+
+function Set-TervisDHCPv4ReservationRouterEdgeRouter {
+    param (
+        [Parameter(Mandatory)]$Hostname,
+        [Parameter(Mandatory,ParameterSetName="ScopeID")]$ScopeID,
+        [Parameter(Mandatory,ParameterSetName="Environment")]$Environment
+    )
+    $Router = Get-NetworkNodeDefinition -ComputerName INF-ERWan02 |
+    Select-Object -ExpandProperty InterfaceDefinition | FL *
+
+    Set-TervisDHCPv4ReservationRouter @PSBoundParameters
 }

@@ -141,19 +141,19 @@ function Invoke-TervisDHCPv4EdgeRouterChanges {
     }
     $DHCPServerName = Get-DhcpServerInDC |  select -ExpandProperty DNSName -First 1
     
-    $MACAddressesToMoveToNewGateway = Get-DhcpServerv4Lease -ScopeId $Scope.ScopeId -ComputerName $DHCPServerName | 
+    $MACAddressesToMoveToNewGateway = Get-DhcpServerv4Lease -ScopeId $ScopeId -ComputerName $DHCPServerName | 
     Where-Object Hostname -Match $Hostname |
     Select-Object -ExpandProperty ClientID
     
     $MACAddressParameter = (@("eq") +$MACAddressesToMoveToNewGateway)
 
-    Add-DhcpServerv4Policy -Name "Default gateway edgerouter in Infrastructure" -Condition OR -ComputerName $DHCPServerName -ScopeId $Scope.ScopeID -MacAddress $MACAddressParameter
-    Set-DhcpServerv4OptionValue -ComputerName $DHCPServerName -PolicyName "Default gateway edgerouter in Infrastructure" -ScopeId $Scope.ScopeID -Router 10.172.48.150
+    Add-DhcpServerv4Policy -Name "Default gateway edgerouter in Infrastructure" -Condition OR -ComputerName $DHCPServerName -ScopeId $ScopeId -MacAddress $MACAddressParameter
+    Set-DhcpServerv4OptionValue -ComputerName $DHCPServerName -PolicyName "Default gateway edgerouter in Infrastructure" -ScopeId $ScopeId -Router 10.172.48.77
     
-    Get-DhcpServerv4Reservation -ComputerName $DHCPServerName -ScopeId $Scope.ScopeId |
+    Get-DhcpServerv4Reservation -ComputerName $DHCPServerName -ScopeId $ScopeId |
     Where-Object Name -Match INF-SCDPM |
     ForEach-Object {
-        Set-DhcpServerv4OptionValue -ComputerName $DHCPServerName -Router 10.172.48.150 -ReservedIP $_.IPAddress
+        Set-DhcpServerv4OptionValue -ComputerName $DHCPServerName -Router 10.172.48.77 -ReservedIP $_.IPAddress
     }
 }
 

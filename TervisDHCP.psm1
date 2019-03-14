@@ -2,10 +2,11 @@
 #Requires -Version 5
 
 function Get-TervisDhcpServerv4Scope {
+    [CmdletBinding(DefaultParameterSetName="__AllParameterSets")]
     param(
-        [Parameter(Mandatory, ParameterSetName="ScopeID")]$ScopeID,
+        [Parameter(ParameterSetName="ScopeID")]$ScopeID,
 
-        [Parameter(Mandatory, ParameterSetName="Environment")]
+        [Parameter(ParameterSetName="Environment")]
         [ValidateScript({$_ -in $(Get-TervisEnvironmentName) })]
         $Environment
     )
